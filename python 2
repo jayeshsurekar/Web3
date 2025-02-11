@@ -1,0 +1,90 @@
+import hashlib
+import tkinter as tk
+from tkinter import messagebox
+
+
+class Block:
+    def __init__(self, index, data, previous_hash):
+        self.index = index
+        self.data = data
+        self.previous_hash = previous_hash
+        self.hash = self.calculate_hash()
+
+    def calculate_hash(self):
+        # Creates a SHA-256 hash of the block's contents
+        block_contents = f"{self.index}{self.data}{self.previous_hash}"
+        return hashlib.sha256(block_contents.encode()).hexdigest()
+
+
+class BlockchainApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Blockchain Concept Explained")
+
+        # Blockchain display frame
+        self.frame = tk.Frame(self.root)
+        self.frame.pack(pady=10)
+
+        # Title
+        title = tk.Label(self.frame, text="Blockchain Visualizer", font=("Helvetica", 18, "bold"))
+        title.grid(row=0, column=0, columnspan=3, pady=10)
+
+        # Add new block button
+        self.add_block_button = tk.Button(self.frame, text="Add Block", command=self.add_block)
+        self.add_block_button.grid(row=1, column=1, pady=10)
+
+        # Block display
+        self.block_display = tk.Text(self.frame, height=15, width=80)
+        self.block_display.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
+
+        # Explanation button
+        self.explain_button = tk.Button(self.frame, text="Explain Blockchain", command=self.explain_blockchain)
+        self.explain_button.grid(row=3, column=1, pady=10)
+
+        self.blockchain = []
+        self.add_genesis_block()
+
+    def add_genesis_block(self):
+        """Adds the genesis block (first block in the blockchain)."""
+        genesis_block = Block(0, "Genesis Block", "0")
+        self.blockchain.append(genesis_block)
+        self.display_block(genesis_block)
+
+    def add_block(self):
+        """Adds a new block to the blockchain."""
+        if not self.blockchain:
+            messagebox.showwarning("Error", "Genesis block is missing!")
+            return
+
+        new_index = len(self.blockchain)
+        previous_block = self.blockchain[-1]
+        new_data = f"Block {new_index} Data"
+
+        new_block = Block(new_index, new_data, previous_block.hash)
+        self.blockchain.append(new_block)
+        self.display_block(new_block)
+
+    def display_block(self, block):
+        """Displays a block's information in the text area."""
+        block_info = f"Block {block.index}:\n" \
+                     f"Data: {block.data}\n" \
+                     f"Previous Hash: {block.previous_hash}\n" \
+                     f"Hash: {block.hash}\n\n"
+        self.block_display.insert(tk.END, block_info)
+
+    def explain_blockchain(self):
+        """Shows a popup with a simple explanation of blockchain."""
+        explanation = ("A blockchain is a decentralized, distributed ledger that records transactions across many "
+                       "computers. A blockchain consists of blocks, where each block holds a set of data, a hash "
+                       "(unique identifier), and the hash of the previous block, which links the blocks together.\n\n"
+                       "When a new block is created, its data is hashed, and this hash is stored in the next block. "
+                       "This ensures the immutability and security of the data in the chain. If any block is tampered "
+                       "with, it will break the chain, making it easy to detect changes.")
+        messagebox.showinfo("What is Blockchain?", explanation)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = BlockchainApp(root)
+    root.mainloop()
+
